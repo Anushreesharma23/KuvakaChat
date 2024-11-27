@@ -1,99 +1,3 @@
-// const http = require('http');
-// const fs = require('fs');
-// const path = require('path');
-// const WebSocket = require('ws');
-
-// const server = http.createServer((req, res) => {
-//     const filePath = req.url === '/' ? 'login.html' : req.url.substring(1);
-//     const fullPath = path.join(__dirname, filePath);  // Ensure full path resolution
-
-//     fs.readFile(fullPath, (err, data) => {
-//         if (err) {
-//             res.statusCode = 500;
-//             res.end(`Error getting the file: ${err}.`);
-//         } else {
-//             res.statusCode = 200;
-//             res.setHeader('Content-type', 'text/html');
-//             res.end(data);
-//         }
-//     });
-// });
-
-// server.listen(8000, () => {
-//     console.log('Server running on http://localhost:8000');
-// });
-
-// const wss = new WebSocket.Server({ port: 8080 });
-// let clients = {};
-
-// wss.on('connection', (ws) => {
-//     let currentUsername = null;
-
-//     ws.on('message', (message) => {
-//         try {
-//             const data = JSON.parse(message);
-//             if (!currentUsername && data.username) {
-//                 currentUsername = data.username;
-//                 clients[ws] = currentUsername;
-
-//                 // Notify all users that someone has entered
-//                 const enterMessage = {
-//                     username: currentUsername,
-//                     message: `${currentUsername} entered the chat.`,
-//                     time: new Date().toISOString(),
-//                     type: 'enter'
-//                 };
-//                 broadcastMessage(enterMessage);
-//             }
-
-//             if (data.type === 'message') {
-//                 const messageWithTimestamp = {
-//                     username: currentUsername,
-//                     message: data.message,
-//                     time: new Date().toISOString(),
-//                     type: 'message'
-//                 };
-//                 broadcastMessage(messageWithTimestamp);
-//             }
-
-//             if (data.type === 'leave') {
-//                 const leaveMessage = {
-//                     username: currentUsername,
-//                     message: `${currentUsername} left the chat.`,
-//                     time: new Date().toISOString(),
-//                     type: 'leave'
-//                 };
-//                 broadcastMessage(leaveMessage);
-//                 delete clients[ws];
-//             }
-//         } catch (error) {
-//             console.error('Error parsing message:', error);
-//         }
-//     });
-
-//     ws.on('close', () => {
-//         if (currentUsername) {
-//             // Broadcast leave message when a user disconnects
-//             const leaveMessage = {
-//                 username: currentUsername,
-//                 message: `${currentUsername} left the chat.`,
-//                 time: new Date().toISOString(),
-//                 type: 'leave'
-//             };
-//             broadcastMessage(leaveMessage);
-//             delete clients[ws];
-//         }
-//     });
-// });
-
-// function broadcastMessage(message) {
-//     wss.clients.forEach((client) => {
-//         if (client.readyState === WebSocket.OPEN) {
-//             client.send(JSON.stringify(message));
-//         }
-//     });
-// }
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -144,6 +48,7 @@ server.listen(PORT, () => {
 });
 
 // WebSocket Server
+
 const wss = new WebSocket.Server({ port: 8080 });
 let clients = {};
 

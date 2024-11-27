@@ -73,8 +73,12 @@
         </div>
     </div>
     <script>
-        //const socket = new WebSocket('ws://localhost:8080');  // Correct WebSocket URL
-        const socket = new WebSocket('wss://kuvakachat.onrender.com');
+        const socket = new WebSocket('ws://localhost:8080');  // Correct WebSocket URL
+        //const socket = new WebSocket('wss://sparkling-longing-moose.glitch.me/',{
+        //   headers:{
+        //       "user-agent": "Chrome"
+        //   } 
+        //});
         let username = localStorage.getItem('username');
 
         if (!username) {
