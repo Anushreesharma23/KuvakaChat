@@ -1,68 +1,5 @@
 // const http = require('http');
 // const fs = require('fs');
-// const WebSocket = require('ws');
-
-// const server = http.createServer((req, res) => {
-//     fs.readFile('index.html', (err, data) => {
-//         if (err) {
-//             res.statusCode = 500;
-//             res.end(`Error getting the file: ${err}.`);
-//         } else {
-//             res.statusCode = 200;
-//             res.setHeader('Content-type', 'text/html');
-//             res.end(data);
-//         }
-//     });
-// });
-
-// server.listen(8000);
-// console.log('Chat app address: http://localhost:8000');
-
-// const wss = new WebSocket.Server({ port: 8080 });
-// let clients = {};
-
-// wss.on('connection', (ws) => {
-//     let currentUsername = null;
-
-//     // When a user sends a message, forward it to all clients
-//     ws.on('message', (message) => {
-//         try {
-//             const data = JSON.parse(message);
-
-//             // If the username isn't set, assign it
-//             if (!currentUsername) {
-//                 currentUsername = data.username;
-//                 clients[ws] = currentUsername; // Store username for this connection
-//             }
-
-//             // Prepare message with timestamp and send it to all clients
-//             const messageWithTimestamp = {
-//                 username: currentUsername,
-//                 message: data.message,
-//                 time: new Date().toISOString(),
-//             };
-
-//             // Broadcast the message to all connected clients
-//             wss.clients.forEach((client) => {
-//                 if (client.readyState === WebSocket.OPEN) {
-//                     client.send(JSON.stringify(messageWithTimestamp));
-//                 }
-//             });
-//         } catch (error) {
-//             console.error('Error parsing message:', error);
-//         }
-//     });
-
-//     // When a user disconnects, remove them from the clients map
-//     ws.on('close', () => {
-//         delete clients[ws];
-//     });
-// });
-
-// working code----------------------------------------
-
-// const http = require('http');
-// const fs = require('fs');
 // const path = require('path');
 // const WebSocket = require('ws');
 
@@ -95,82 +32,38 @@
 //     ws.on('message', (message) => {
 //         try {
 //             const data = JSON.parse(message);
-//             if (!currentUsername) {
+//             if (!currentUsername && data.username) {
 //                 currentUsername = data.username;
 //                 clients[ws] = currentUsername;
+
+//                 // Notify all users that someone has entered
+//                 const enterMessage = {
+//                     username: currentUsername,
+//                     message: `${currentUsername} entered the chat.`,
+//                     time: new Date().toISOString(),
+//                     type: 'enter'
+//                 };
+//                 broadcastMessage(enterMessage);
 //             }
 
-//             const messageWithTimestamp = {
-//                 username: currentUsername,
-//                 message: data.message,
-//                 time: new Date().toISOString(),
-//             };
-
-//             wss.clients.forEach((client) => {
-//                 if (client.readyState === WebSocket.OPEN) {
-//                     client.send(JSON.stringify(messageWithTimestamp));
-//                 }
-//             });
-//         } catch (error) {
-//             console.error('Error parsing message:', error);
-//         }
-//     });
-
-//     ws.on('close', () => {
-//         delete clients[ws];
-//     });
-// });
-
-/// making the ui better------------------------------
-
-// const http = require('http');
-// const fs = require('fs');
-// const path = require('path');
-// const WebSocket = require('ws');
-
-// const server = http.createServer((req, res) => {
-//     const filePath = req.url === '/' ? 'login.html' : req.url.substring(1);
-//     const fullPath = path.join(__dirname, filePath);  // Ensure full path resolution
-
-//     fs.readFile(fullPath, (err, data) => {
-//         if (err) {
-//             res.statusCode = 500;
-//             res.end(`Error getting the file: ${err}.`);
-//         } else {
-//             res.statusCode = 200;
-//             res.setHeader('Content-type', 'text/html');
-//             res.end(data);
-//         }
-//     });
-// });
-
-// server.listen(8000, () => {
-//     console.log('Server running on http://localhost:8000');
-// });
-
-// const wss = new WebSocket.Server({ port: 8080 });
-// let clients = {};
-
-// wss.on('connection', (ws) => {
-//     let currentUsername = null;
-
-//     ws.on('message', (message) => {
-//         try {
-//             const data = JSON.parse(message);
-//             if (data.type === 'join') {
-//                 currentUsername = data.username;
-//                 clients[ws] = currentUsername;
-//                 broadcastNotification(`${currentUsername} entered the chat`);
-//             } else if (data.type === 'chat') {
+//             if (data.type === 'message') {
 //                 const messageWithTimestamp = {
-//                     type: 'chat',
 //                     username: currentUsername,
 //                     message: data.message,
 //                     time: new Date().toISOString(),
+//                     type: 'message'
 //                 };
 //                 broadcastMessage(messageWithTimestamp);
-//             } else if (data.type === 'leave') {
-//                 broadcastNotification(`${currentUsername} left the chat`);
+//             }
+
+//             if (data.type === 'leave') {
+//                 const leaveMessage = {
+//                     username: currentUsername,
+//                     message: `${currentUsername} left the chat.`,
+//                     time: new Date().toISOString(),
+//                     type: 'leave'
+//                 };
+//                 broadcastMessage(leaveMessage);
 //                 delete clients[ws];
 //             }
 //         } catch (error) {
@@ -180,7 +73,14 @@
 
 //     ws.on('close', () => {
 //         if (currentUsername) {
-//             broadcastNotification(`${currentUsername} left the chat`);
+//             // Broadcast leave message when a user disconnects
+//             const leaveMessage = {
+//                 username: currentUsername,
+//                 message: `${currentUsername} left the chat.`,
+//                 time: new Date().toISOString(),
+//                 type: 'leave'
+//             };
+//             broadcastMessage(leaveMessage);
 //             delete clients[ws];
 //         }
 //     });
@@ -194,42 +94,56 @@
 //     });
 // }
 
-// function broadcastNotification(message) {
-//     const notification = {
-//         type: 'notification',
-//         message: message,
-//         time: new Date().toISOString(),
-//     };
-//     broadcastMessage(notification);
-// }
-
-
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
 
-const server = http.createServer((req, res) => {
-    const filePath = req.url === '/' ? 'login.html' : req.url.substring(1);
-    const fullPath = path.join(__dirname, filePath);  // Ensure full path resolution
+const PORT = process.env.PORT || 8000;
 
+// Create the server
+const server = http.createServer((req, res) => {
+    // Define the base folder for static files
+    const baseDir = path.join(__dirname, 'public');
+    const filePath = req.url === '/' ? 'login.html' : req.url;
+    const fullPath = path.join(baseDir, filePath);
+
+    // Serve the requested file
     fs.readFile(fullPath, (err, data) => {
         if (err) {
-            res.statusCode = 500;
-            res.end(`Error getting the file: ${err}.`);
+            // Handle file not found or other errors
+            if (err.code === 'ENOENT') {
+                res.statusCode = 404;
+                res.end('404: File Not Found');
+            } else {
+                res.statusCode = 500;
+                res.end('500: Internal Server Error');
+            }
         } else {
-            res.statusCode = 200;
-            res.setHeader('Content-type', 'text/html');
+            // Determine the content type
+            const ext = path.extname(fullPath).toLowerCase();
+            const contentType = {
+                '.html': 'text/html',
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.json': 'application/json',
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.ico': 'image/x-icon'
+            }[ext] || 'text/plain';
+
+            res.writeHead(200, { 'Content-Type': contentType });
             res.end(data);
         }
     });
 });
 
-server.listen(8000, () => {
-    console.log('Server running on http://localhost:8000');
+// Start the server
+server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
 
+// WebSocket Server
 const wss = new WebSocket.Server({ port: 8080 });
 let clients = {};
 
