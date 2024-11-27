@@ -19,13 +19,15 @@
             </form>
         </div>
     </div>
+
     <script>
-        document.getElementById('login-form').onsubmit = function(event) {
+        document.getElementById('login-form').onsubmit = function (event) {
             event.preventDefault();
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
+
             if (username) {
                 localStorage.setItem('username', username);
-                window.location.href = 'chat.html'; // Ensure this is a clean redirect
+                window.location.href = 'chat.html';
             } else {
                 alert('Please enter a username');
             }
