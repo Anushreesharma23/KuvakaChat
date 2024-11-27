@@ -3,37 +3,26 @@ const fs = require('fs');
 const path = require('path');
 const WebSocket = require('ws');
 
-const PORT = process.env.PORT || 8000;
+const PORT = 8000; // HTTP Server Port
+const WS_PORT = 8080; // WebSocket Port
 
-// Create the server
+// HTTP Server to Serve Static Files
 const server = http.createServer((req, res) => {
-    // Define the base folder for static files
-    const baseDir = path.join(__dirname, 'public');
-    const filePath = req.url === '/' ? 'login.html' : req.url;
+    const baseDir = path.join(__dirname, 'public'); // Public folder for files
+    const filePath = req.url === '/' ? 'login.html' : req.url; // Default to login.html
     const fullPath = path.join(baseDir, filePath);
 
-    // Serve the requested file
+    // Serve Files or Handle Errors
     fs.readFile(fullPath, (err, data) => {
         if (err) {
-            // Handle file not found or other errors
-            if (err.code === 'ENOENT') {
-                res.statusCode = 404;
-                res.end('404: File Not Found');
-            } else {
-                res.statusCode = 500;
-                res.end('500: Internal Server Error');
-            }
+            res.statusCode = err.code === 'ENOENT' ? 404 : 500;
+            res.end(`${res.statusCode}: ${err.code === 'ENOENT' ? 'File Not Found' : 'Internal Server Error'}`);
         } else {
-            // Determine the content type
-            const ext = path.extname(fullPath).toLowerCase();
+            const ext = path.extname(fullPath);
             const contentType = {
                 '.html': 'text/html',
                 '.css': 'text/css',
-                '.js': 'application/javascript',
-                '.json': 'application/json',
-                '.png': 'image/png',
-                '.jpg': 'image/jpeg',
-                '.ico': 'image/x-icon'
+                '.js': 'application/javascript'
             }[ext] || 'text/plain';
 
             res.writeHead(200, { 'Content-Type': contentType });
@@ -42,78 +31,56 @@ const server = http.createServer((req, res) => {
     });
 });
 
-// Start the server
+// Start HTTP Server
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`HTTP Server running at http://localhost:${PORT}`);
 });
 
-// WebSocket Server
-
-const wss = new WebSocket.Server({ port: 8080 });
-let clients = {};
+// WebSocket Server for Real-Time Communication
+const wss = new WebSocket.Server({ port: WS_PORT });
+const clients = new Map(); // Store WebSocket clients and their usernames
 
 wss.on('connection', (ws) => {
-    let currentUsername = null;
+    let username = null;
 
     ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message);
-            if (!currentUsername && data.username) {
-                currentUsername = data.username;
-                clients[ws] = currentUsername;
+        const data = JSON.parse(message);
 
-                // Notify all users that someone has entered
-                const enterMessage = {
-                    username: currentUsername,
-                    message: `${currentUsername} entered the chat.`,
-                    time: new Date().toISOString(),
-                    type: 'enter'
-                };
-                broadcastMessage(enterMessage);
-            }
+        // Handle New User or Broadcast Messages
+        if (!username && data.username) {
+            username = data.username;
+            clients.set(ws, username);
 
-            if (data.type === 'message') {
-                const messageWithTimestamp = {
-                    username: currentUsername,
-                    message: data.message,
-                    time: new Date().toISOString(),
-                    type: 'message'
-                };
-                broadcastMessage(messageWithTimestamp);
-            }
-
-            if (data.type === 'leave') {
-                const leaveMessage = {
-                    username: currentUsername,
-                    message: `${currentUsername} left the chat.`,
-                    time: new Date().toISOString(),
-                    type: 'leave'
-                };
-                broadcastMessage(leaveMessage);
-                delete clients[ws];
-            }
-        } catch (error) {
-            console.error('Error parsing message:', error);
+            broadcast({
+                type: 'enter',
+                message: `${username} entered the chat.`,
+                time: new Date().toISOString()
+            });
+        } else if (data.type === 'message') {
+            broadcast({
+                type: 'message',
+                username: data.username,
+                message: data.message,
+                time: new Date().toISOString()
+            });
         }
     });
 
     ws.on('close', () => {
-        if (currentUsername) {
-            // Broadcast leave message when a user disconnects
-            const leaveMessage = {
-                username: currentUsername,
-                message: `${currentUsername} left the chat.`,
-                time: new Date().toISOString(),
-                type: 'leave'
-            };
-            broadcastMessage(leaveMessage);
-            delete clients[ws];
+        if (username) {
+            clients.delete(ws);
+            broadcast({
+                type: 'leave',
+                message: `${username} left the chat.`,
+                time: new Date().toISOString()
+            });
         }
     });
 });
 
-function broadcastMessage(message) {
-    wss.clients.forEach((client) => {
+// Broadcast Messages to All Connected Clients
+function broadcast(message) {
+    clients.forEach((_, client) => {
         if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify(message));
         }
