@@ -16,7 +16,7 @@ A real-time chat application built using Node.js, WebSocket, and Vanilla JavaScr
 ## Prerequisites
 - [Node.js](https://nodejs.org/) installed on your machine.
 - A package manager like `npm` (bundled with Node.js).
-- Git for version control.
+- Git and GitHub for version control.
 
 ---
 
@@ -47,10 +47,7 @@ A real-time chat application built using Node.js, WebSocket, and Vanilla JavaScr
 I have deployed the application on Glitch, and you can access the live version here: **[https://relic-perfect-sneeze.glitch.me/login.html](#)**
 
 To run it on Glitch yourself:
-
-1. Copy the code from the desired branch in this repository.
-2. Make changes to the WebSocket URL in the code to match your Glitch project name.
-3. Install the required dependencies (`ws` and `express`) in your `package.json` file:
+1. Install the required dependencies (ws and express) in your `package.json` file:
     ```json
     {
       "dependencies": {
@@ -59,6 +56,18 @@ To run it on Glitch yourself:
       }
     }
     ```
+2. Make Changes in chat.html
+You would need to adjust the WebSocket connection:
+- Inside the `chat.html` file, replace:
+    ```javascript
+    const socket = new WebSocket('ws://localhost:8080');
+    ```
+- With:
+    ```javascript
+    const socket = new WebSocket('wss://' + window.location.hostname);
+    ```
+3. The Glitch deployed code is also available in the branch named `deployed_glitch`.
+
 4. Start the project in Glitch, and it should work seamlessly.
 
 ## Application Architecture
@@ -77,6 +86,7 @@ To run it on Glitch yourself:
   - A WebSocket server (`ws`) is set up to manage multiple client connections.
   - Each client connection is assigned a unique WebSocket instance.
   - Broadcasts messages to all connected clients using `wss.clients`.
+  - **WebSocket** is a built-in JavaScript API, part of the standard Web platform, and does not require any extra libraries or dependencies for basic usage.
 
 - **Asynchronous Patterns:**
   - The WebSocket `onmessage` event ensures asynchronous processing of incoming messages.
@@ -88,11 +98,13 @@ To run it on Glitch yourself:
 
 1. **LocalStorage for Username Persistence:**
    - The username is stored in the browser's `localStorage` for simplicity. This ensures a seamless experience across page reloads without implementing backend storage.
-
+   - 
 2. **WebSocket for Real-Time Messaging:**
-   - WebSocket was chosen for its low latency and ability to handle bi-directional communication efficiently.
+   - WebSocket was chosen for its low latency, high efficiency, and ability to handle bi-directional communication seamlessly in real-time.
+   - **WebSocket** is a native part of the JavaScript language and is built into all modern web browsers. It allows for full-duplex communication channels over a single, long-lived connection, ensuring minimal overhead compared to traditional HTTP polling or long-polling methods.
+   - This makes **WebSocket** ideal for real-time applications like chat systems, where low latency and immediate data exchange are critical.
 
-3. **Message Handling:**
+3. **User Handling:**
    - All messages, including "entered" and "left" notifications, are timestamped and styled differently to enhance readability.
 
 4. **Error Handling:**
@@ -117,7 +129,6 @@ To run it on Glitch yourself:
 ## Example Interaction Flow
 1. User enters a username in `login.html`.
 2. The user is redirected to `chat.html`, where:
-   - They see a welcome message.
    - They can send messages to the group.
    - They receive notifications when users join or leave the chat.
 
@@ -131,5 +142,5 @@ To run it on Glitch yourself:
 
 ---
 
-## License
-This project is licensed under the [MIT License](LICENSE).
+## Made By:
+Anushree Sharma, For Kuvaka Tech under 60 hours.
