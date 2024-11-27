@@ -44,7 +44,7 @@ A real-time chat application built using Node.js, WebSocket, and Vanilla JavaScr
 
 ### Running on Glitch
 
-I have deployed the application on Glitch, and you can access the live version here: **[https://relic-perfect-sneeze.glitch.me/login.html](#)**.
+I have deployed the application on Glitch, and you can access the live version here: **[https://relic-perfect-sneeze.glitch.me/login.html](#)**
 
 To run it on Glitch yourself:
 
@@ -128,11 +128,6 @@ To run it on Glitch yourself:
 - Implement backend authentication for better security.
 - Store chat history in a database for persistence.
 - Integrate typing indicators.
-
----
-
-## Contributions
-Contributions are welcome! Fork the repository, create a branch, and submit a pull request.
 
 ---
 
