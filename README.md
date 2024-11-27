@@ -4,6 +4,13 @@ A real-time chat application built using Node.js, WebSocket, and Vanilla JavaScr
 
 ---
 
+## Live Link
+**[https://relic-perfect-sneeze.glitch.me/login.html](#)**
+## Video Demonstration
+https://github.com/user-attachments/assets/9d63d392-c21d-4ef6-95f3-cd3918cc51f9
+
+---
+
 ## Features
 - **Real-time Communication:** Enables users to chat in real-time using WebSocket.
 - **Concurrency Handling:** Supports multiple users concurrently through WebSocket connections.
